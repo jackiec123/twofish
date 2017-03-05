@@ -8,40 +8,40 @@
 #include <string>
 using namespace std;
 
+//NEED TO DOULE CHECK ALL READIN FOR BINARY ARRAYS MUST FOLLOW SAME THROUGHOUT
+int decimal(int byteArray[]){
+	int decimal = 0;
+	for(int i = 0; i<8; i++){
+		if(byteArray[i] ==1){
+		decimal = decimal + byteArray[i] * pow(2,i);
+		}
+	}
+	return decimal; 
+}
 
 unsigned int ROR4(unsigned int x){
-	for(int i = 0; i<4; i++){
+	for(int i = 0; i<4; i++){            
 		x = (x & 1)<<7|(x>>1);
 	}
 	return x;
 }
-//To obtain the round keys
-int hFunction(int x,int listM[1][32]){ //takes in 32 bit word and either Meven/Modd
+unsigned int ROL8(unsigned int x){
+	for(int i = 0; i<8;i++){
+		x = (x & 1)>>31|(x<<1);
+	}
+	return x;
+}
+
+int q0Permutation(int x){
 	int fixedSboxQ0[4][16]={0x8,0x1,0x7,0xd,0x6,0xf,0x3,0x2,0x0,0xb,0x5,0x9,0xe,0xc,0xa,0x4,
 					0xe,0xc,0xb,0x8,0x1,0x2,0x3,0x5,0xf,0x4,0xa,0x6,0x7,0x0,0x9,0xd,
 					0xb,0xa,0x5,0xe,0x6,0xd,0x9,0x0,0xc,0x8,0xf,0x3,0x2,0x4,0x7,0x1,
 					0xd,0x7,0xf,0x4,0x1,0x2,0x6,0xe,0x9,0xb,0x3,0x0,0x8,0x5,0xc,0xa};
-	int fixedSboxQ1[4][16]={0x2,0x8,0xb,0xd,0xf,0x7,0x6,0xe,0x3,0x1,0x9,0x4,0x0,0xc,0x5,
-					0x1,0xe,0x2,0xb,0x4,0xc,0x3,0x7,0x6,0xd,0xa,0x5,0xf,0x9,0x0,0x8,
-					0x4,0xc,0x7,0x5,0x1,0x6,0x9,0xa,0x0,0xe,0xd,0x8,0x2,0xb,0x3,0xf,
-					0xb,0x9,0x5,0x1,0xc,0x3,0xd,0xe,0x6,0x4,0x7,0xf,0x2,0x0,0x8,0xa};
-	int MDS[4][4] = {0x01,0xEF,0x5B,0x5B,
-				 0x5B,0xEF,0xEF,0x01,
-				 0xEF,0x5B,0x01,0xEF,
-				 0xEF,0x01,0xEF,0x5B};
-	//obtaining the 4 bytes for the sboxes
-	int words[4];
-	for(int i = 0; i<4; i++){
-		words[i] = fmod(x/(pow(2,(8*i))),256);
-		//cout<<words[i]<<endl;
-	}
-	for(int h = 1; h>0; h--){
-	//permutations q0 and q1
-	for(int i = 0; i<4; i++){
-		int a0 = words[i]/16;
-		int b0 = (words[i],16);
+	
+		int a0 = x/16;
+		int b0 = (x,16);
 		int a1 = a0^b0;//xor	
-		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values -- no correct
+		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 
 		int a2 = fixedSboxQ0[0][a1];
 		int b2 = fixedSboxQ0[1][b1];
 		int a3 = a2^b2;
@@ -50,93 +50,143 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word and either Meven/M
 		int b4 = fixedSboxQ0[3][b3];
 		int y = 16*b4 + a4;
 		//cout<<y<<endl;
-		words[i]=y;//y is 1 byte
+		//y is 1 byte
 		//cout<<words[i]<<endl;
+		return y;
+	
+}
+int q1Permutation(int x){
+		int fixedSboxQ1[4][16]={0x2,0x8,0xb,0xd,0xf,0x7,0x6,0xe,0x3,0x1,0x9,0x4,0x0,0xc,0x5,
+					0x1,0xe,0x2,0xb,0x4,0xc,0x3,0x7,0x6,0xd,0xa,0x5,0xf,0x9,0x0,0x8,
+					0x4,0xc,0x7,0x5,0x1,0x6,0x9,0xa,0x0,0xe,0xd,0x8,0x2,0xb,0x3,0xf,
+					0xb,0x9,0x5,0x1,0xc,0x3,0xd,0xe,0x6,0x4,0x7,0xf,0x2,0x0,0x8,0xa};
+	
+		int a0 = x/16;
+		int b0 = (x,16);
+		int a1 = a0^b0;//xor	
+		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 
+		int a2 = fixedSboxQ1[0][a1];
+		int b2 = fixedSboxQ1[1][b1];
+		int a3 = a2^b2;
+		int b3 = (a2^(ROR4(b2)))^((8*a2)%16);//--used the ROR4 defined fxn
+		int a4 = fixedSboxQ1[2][a3];
+		int b4 = fixedSboxQ1[3][b3];
+		int y = 16*b4 + a4;
+		//cout<<y<<endl;
+		//y is 1 byte
+		//cout<<words[i]<<endl;
+		return y;
+	
+}
+//To obtain the round keys
+int hFunction(int x,int listM[1][32]){ //takes in 32 bit word & either Meven/Modd(list(2) of 32bit words)
+	//for Meven M0 is listM[0][], M2 is listM[1]
+	int MDS[4][4] = {0x01,0xEF,0x5B,0x5B,
+				 0x5B,0xEF,0xEF,0x01,
+				 0xEF,0x5B,0x01,0xEF,
+				 0xEF,0x01,0xEF,0x5B};
+	 
+	int m0[7];
+	int m1[7];
+	int m2[7];
+	int m3[7];
+//takes M2 and divides into bytes which will be converted to decimal
+	for (int i = 0; i<8; i++){
+		m0[i] = listM[1][i];	
+	}
+	int j = 0;
+	for (int i =8; i<16; i++){
+		m1[j]=listM[1][i];
+		j++;
+	}
+	j = 0;
+	for (int i =16; i<24; i++){
+		m2[j]=listM[1][i];
+		j++;
+	}
+	j = 0;
+	for (int i =24; i<32; i++){
+		m3[j]=listM[1][i];
+		j++;
 	}
 
-	//int* conversion = decimalToByte(words);
-	int combineWords[32];
-	//I now need to convert each words[i] decimal to a bytearray and then xor with listM
-	//Currently have j = 0 as first 8 j=1 as second 8...
-	for(int y = 0; y<32; y++){
-		
-	int mult = 0;
-	for(int j = 0; j<4; j++){
-		int byteArray[8];
-	//int* byte(byteArray);
-		int i = 7;
-		while(words[j] !=0 || words[j]>0){
-		
-		int moddec = words[j];
-		int bit;
-		words[j] = words[j]/2;
-		bit = moddec%2;
-		byteArray[i] = bit;
-		i--;
-		//cout<<bit<<endl;
-		}
-		for(int k = 0; k<8; k++){
-			combineWords[k*mult]=byteArray[k];
-		}
-		mult = mult + 1;
-	}
+	int decimalList[3];
+	decimalList[0]=decimal(m0);
+	decimalList[1]=decimal(m1);
+	decimalList[2]=decimal(m2);
+	decimalList[3]=decimal(m3);
 
-		combineWords[y]=combineWords[y]^listM[h][y];//listM goes 0 to 31 words 0 to 4
-		//WRONG DOES NOT properly XOR rn 1 byte in decimal form with 1 bit -- should be correct now
+	int words[3];
+	words[0]=x;
+	words[1]=x;
+	words[2]=x;
+	words[3]=x;
+
+	words[0] = q0Permutation(words[0]);
+	words[1] = q1Permutation(words[1]);
+	words[2] = q0Permutation(words[2]);
+	words[3] = q1Permutation(words[3]);
+
+	for(int i = 0; i<4; i++){
+		words[i] = words[i]^decimalList[i]; //XOR first Meven(M2)with the word
 	}
 	
-	//convert 32 bit to 4 x 8 array
-	int finalq[4][8];
-	for(int mult=1; mult<4; mult++){
-		for(int i = 0; i<8; i++){
-			
-			finalq[mult-1][i]=combineWords[i*mult-1];//not correct mult*i does not work
-		}
-	}
-	for(int i = 0; i<4; i++){
-		int mult = 0;
-		int total;
-		for(int j = 0; j<8; j++)
-	total = total + (finalq[i][j]*pow(2,mult));//convert byte to decimal
-	mult = mult+1;
-	words[i]=total;
-	}	
+	/*words[0] = q0Permutation(words[0]);
+	words[1] = q0Permutation(words[1]);
+	words[2] = q1Permutation(words[2]);
+	words[3] = q1Permutation(words[3]);
 
-}
-	//Now multiply words array by MDS matrix
+	
+//takes M0 and divides into bytes which will be converted to decimal
+/*	int k =0;
+	for (int i = 0; i<8; i++){
+		m0[i] = listM[0][i];	
+	}
+
+	for (int i =8; i<16; i++){
+		m1[k]=listM[0][i];
+		k++;
+	}
+	k = 0;
+	for (int i =16; i<24; i++){
+		m2[k]=listM[0][i];
+		k++;
+	}
+	k = 0;
+	for (int i =24; i<32; i++){
+		m3[k]=listM[0][i];
+		k++;
+	}
+
+	decimalList[0]=decimal(m0);
+	decimalList[1]=decimal(m1);
+	decimalList[2]=decimal(m2);
+	decimalList[3]=decimal(m3);
+
+	for(int i = 0; i<4; i++){
+		stage2Words[i] = stage2Words[i]^decimalList[i]; //XOR first Meven(M0)with the word
+	}
+	
+	words[0] = q0Permutation(stage2Words[0]);
+	words[1] = q0Permutation(stage2Words[1]);
+	words[2] = q1Permutation(stage2Words[2]);
+	words[3] = q0Permutation(stage2Words[3]);*/
+
+	//Now multiply words array by MDS matrix and add em up!
 	for(int j = 0; j<4; j++){
 		int sum;
 		for(int i = 0; i<4; i++){
 			sum = sum + MDS[j][i]*words[i];
-			words[i] = sum;
 		}
+			words[j] = sum;
+		
 	}
-	//so words[0] is good
-	//words[1] needs to 
-	//cout<<words[2]<<endl;
+	int end = words[0]+words[1]+words[2]+words[3];
+	cout<<words[0]<<" "<<words[1]<<" "<<words[2]<<" "<<words[3]<<" "<<end<<endl;
+	return end;
 
-	return words[0];
 }
 
-
-//Need function to conert decimal array to binary
-//int* decimalToByte(int decimal){
-/*	int byteArray[8];
-	int* byte(byteArray);
-	int i = 7;
-	while(decimal !=0 || decimal>0){
-		
-		int moddec = decimal;
-		int bit;
-		decimal = decimal/2;
-		bit = moddec%2;
-		byteArray[i] = bit;
-		i--;
-		cout<<bit<<endl;
-	}
-	//byte = byteArray;
-	return byte;
-}*/
 
 int main(){
 
@@ -149,9 +199,8 @@ int main(){
 	for (int i = 0; i<128; i++){
 		//cout <<message[i]; //prints message
 	}
-	cout <<"\n";
-
-	cout<<"\n THE KEY";
+	//cout <<"\n";
+	//cout<<"\n THE KEY";
 
 	//generate 128 bit key, N=128,192, 256. can set this in the future, for now its 128
 	int N = 128; //key size
@@ -159,12 +208,12 @@ int main(){
 	for (int n = 0; n<128; n++){
 	  int i  = rand()%2;
 	  key[n] = i;
-	  cout << key[n];
+	  //cout << key[n];
 	}
 
 	//k = N/64, where N=128
 	int k = N/64;
-	cout<<"\n";
+	
 	//cout<<k;
 	cout<<"\n";
 
@@ -182,19 +231,25 @@ int main(){
 		Meven[0][i]=key[i];
 		//cout<<M0[i];
 	}
-	
+	int j = 0;
 	for (int i =32; i<64; i++){
-		M1[i]=key[i];
-		Modd[0][i]=key[i];
+		M1[j]=key[i];
+		Modd[0][j]=key[i];
+		j++;
 		//cout<<M1[i];
 	}
+	j=0;
 	for (int i = 64; i<96; i++){
-		M2[i] = key[i];
-		Meven[1][i]=key[i];
+		M2[j] = key[i];
+		Meven[1][j]=key[i];
+		//cout<<Meven[1][j];
+		j++;
 	}
+	j=0;
 	for (int i = 97; i<128; i++){
-		M3[i] = key[i];
-		Modd[0][i] = key[i];
+		M3[j] = key[i];
+		Modd[0][j] = key[i];
+		j++;
 		//cout<<M3[i]<<endl;
 	}
 	
@@ -255,30 +310,61 @@ int main(){
 	//cout<<hFunction(sArrays[0][0], Meven)<<endl;
 	//cout<<hFunction(sArrays[1][0], Modd)<<endl;
 
-	//function h takes in 32 bit word and either Meven or Modd
-	//EVEN ROUNDS
+	
 
 	int p = 16843009;
 	int word;
 	int hWords[40];
-	for(int round = 0; round<40; round++){
+/*	for(int round = 0; round<40; round++){
 		if(round%2 == 0){
-		word = 2*round*p;
+		word = 2*round;//Got rid of *p;
 	}
-	else{
-		word = (2*round + 1)*p;
+	if(round%2 != 0){
+		word = (2*round + 1); //got rid of*p;
 	}
 		hWords[round] = word;
+		cout<<round<<" ";
+		cout<<word<<endl;
+}*/
+
+
+//Actually obtains 40 subkeys and places in array !!!
+//cout<<hWords[17]<<endl;
+int subkeys[40];
+int subkey;
+for(int i = 0; i<40; i++){
+	if(i%2 == 0){
+	//if (hWords[i]%2 == 0){
+	//subkey = hFunction(hWords[i],Meven);
+		subkey = hFunction(i,Meven);
+	}
+	else{
+		//subkey = (hFunction(hWords[i], Modd))<<8;
+		subkey = (hFunction(i,Modd))<<8;
+	}
+	//subkeys[i] = subkey;
+	cout<<i<<" "<<"end ";
 }
-cout<<hWords[3]<<endl;
+	int roundKeys[40];
+	for(int i = 0; i<40; i++){
+		if(i%2 ==0){
+			roundKeys[i] = (subkeys[i] + subkeys[i+1])%32;
+		}
+		else{
+			roundKeys[i]= ((subkeys[i-1]+2*subkeys[i])%32)<<9;
+		}
+		cout<<i<<" "<<roundKeys[i]<<endl;
+	}
 
+	//int evenkey = (hFunction(hWords[17], Meven));
 
-	int evenkey = (hFunction(hWords[0], Meven));
 	// + hFunction(sArrays[0][0], Modd))%32;
 	//int oddkey = ((hFunction(sArrays[0][0], Meven) + hFunction(sArrays[0][0], Modd))%32)<<9;
-	cout<<"k0 = "<<evenkey<<endl;
+	//cout<<"k0 = "<<evenkey<<endl;
 	//cout<<"k1 = "<<oddkey<<endl;
 	
+
+	cout<<ROL8(463967426);
 
 
 }
