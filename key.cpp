@@ -39,19 +39,19 @@ unsigned int ROL9(unsigned int x){
 	return x;
 }
 
-int q0Permutation(int x){
+int q0Permutation(int x){//THIS IS WHERE THE ERROR IS ALWAYS OUPTUTS SAME ANSWER, WHAT DO WE TAKE IN
 	int fixedSboxQ0[4][16]={0x8,0x1,0x7,0xd,0x6,0xf,0x3,0x2,0x0,0xb,0x5,0x9,0xe,0xc,0xa,0x4,
 					0xe,0xc,0xb,0x8,0x1,0x2,0x3,0x5,0xf,0x4,0xa,0x6,0x7,0x0,0x9,0xd,
 					0xb,0xa,0x5,0xe,0x6,0xd,0x9,0x0,0xc,0x8,0xf,0x3,0x2,0x4,0x7,0x1,
 					0xd,0x7,0xf,0x4,0x1,0x2,0x6,0xe,0x9,0xb,0x3,0x0,0x8,0x5,0xc,0xa};
 		int a0 = x/16;//130
-		int b0 = (x,16);//2
+		int b0 = (x%16);//2
+		cout<<"BOO"<<b0<<endl;
 		int a1 = a0^b0;//xor	128
 		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 138
 		int a2 = fixedSboxQ0[0][a1];//but 138 is 1 byte and sboxes take 4 bits
 		int b2 = fixedSboxQ0[1][b1];
 		int a3 = a2^b2;
-		int t = ROR4(b2);
 		int b3 = (a2^(ROR4(b2)))^((8*a2)%16);//--used the ROR4 defined fxn
 		int a4 = fixedSboxQ0[2][a3];
 		int b4 = fixedSboxQ0[3][b3];
@@ -67,7 +67,7 @@ int q1Permutation(int x){
 					0x4,0xc,0x7,0x5,0x1,0x6,0x9,0xa,0x0,0xe,0xd,0x8,0x2,0xb,0x3,0xf,
 					0xb,0x9,0x5,0x1,0xc,0x3,0xd,0xe,0x6,0x4,0x7,0xf,0x2,0x0,0x8,0xa};
 		int a0 = x/16;
-		int b0 = (x,16);
+		int b0 = (x%16);
 		int a1 = a0^b0;//xor	
 		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 
 		int a2 = fixedSboxQ1[0][a1];
@@ -89,6 +89,8 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 				 0x5B,0xEF,0xEF,0x01,
 				 0xEF,0x5B,0x01,0xEF,
 				 0xEF,0x01,0xEF,0x5B};
+
+				 cout<<"MAYVALUE"<<x<<endl;
 	int m0[7];
 	int m1[7];
 	int m2[7];
@@ -135,15 +137,13 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 	words[1] = q1Permutation(words[1]);
 	words[2] = q0Permutation(words[2]);
 	words[3] = q1Permutation(words[3]);
-	for(int i = 0; i< 4; i++){
-		cout<<words[i]<<endl;
-	}
+
 
 	for(int i = 0; i<4; i++){
 		cout<<i<<":"<<words[i]<<endl;
 		words[i] = words[i]^decimalList[i]; 
 		cout<<"DOUBLE CHECK"<<words[i]<<endl;//XOR first Meven(M2)with the word
-	}//this is what cause the segmentation fault... some ouput is over 1 byte and are unable to be a lookoup in th epermutation 
+	}
 	
 	words[0] = q0Permutation(words[0]);
 	words[1] = q0Permutation(words[1]);
@@ -203,10 +203,10 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 		int sum=0;
 		for(int i = 0; i<4; i++){
 			sum = sum + MDS[j][i]*words[i];
-			cout<<MDS[j][i]<<"*"<<words[i]<<endl;
+			//cout<<MDS[j][i]<<"*"<<words[i]<<endl;
 		}
 			toBeAdded[j] = sum;
-			cout<<"words[j]:"<<toBeAdded[j]<<endl;
+			//cout<<"words[j]:"<<toBeAdded[j]<<endl;
 		
 	}
 	int end = toBeAdded[0]+toBeAdded[1]+toBeAdded[2]+toBeAdded[3];
@@ -236,9 +236,13 @@ int main(){
 	//generate 128 bit key, N=128,192, 256. can set this in the future, for now its 128
 	int N = 128; //key size
 	int key[128];
+
+	for(int i = 0; i<128; i++){
+	key[i] = 0;
+}
 	for (int n = 0; n<128; n++){
 	  int i  = rand()%2;
-	  key[n] = i;
+	  //key[n] = i;
 	  //cout << key[n];
 	  outfile<<key[n];
 	}
@@ -378,14 +382,11 @@ int subkeys[39];
 int subkey;
 for(int i = 0; i<40; i++){
 	if(i%2 == 0){
-	//if (hWords[i]%2 == 0){
-	//subkey = hFunction(hWords[i],Meven);
-		outfile<<"even"<<hWords[i]<<endl;
+		outfile<<"even:"<<hWords[i]<<endl;
 		subkey = hFunction(hWords[i],Meven);
 	}
 	else{
-		//subkey = (hFunction(hWords[i], Modd))<<8;
-		outfile<<"odd"<<endl;
+		outfile<<"odd:"<<hWords[i]<<endl;
 		subkey = ROL8(hFunction(hWords[i],Modd));
 	}
 	subkeys[i] = subkey;
@@ -396,16 +397,16 @@ for(int i = 0; i<40; i++){
 	int roundKeys[39];
 	for(int i = 0; i<40; i++){
 		if(i%2 ==0){
-			roundKeys[i] = (subkeys[i] + subkeys[i+1])%256;
+			roundKeys[i] = (subkeys[i] + subkeys[i+1])%4294967296;
 		}
 		else{
-			roundKeys[i]= ROL9((subkeys[i-1]+2*subkeys[i])%256);
+			roundKeys[i]= ROL9((subkeys[i-1]+2*subkeys[i])%4294967296);
 		}
 		//cout<<i<<" "<<roundKeys[i]<<endl;
 	}
 	outfile<<"OFFICIAL KEYS:"<<endl;
-for (int i = 0; i<40; i++){
-	outfile<<roundKeys[i]<<endl;
+	for (int i = 0; i<40; i++){
+		outfile<<roundKeys[i]<<endl;
 }
 
 	//int evenkey = (hFunction(hWords[17], Meven));
@@ -414,6 +415,9 @@ for (int i = 0; i<40; i++){
 	//int oddkey = ((hFunction(sArrays[0][0], Meven) + hFunction(sArrays[0][0], Modd))%32)<<9;
 	//cout<<"k0 = "<<evenkey<<endl;
 	//cout<<"k1 = "<<oddkey<<endl;
+
+
+
 
 }
 
