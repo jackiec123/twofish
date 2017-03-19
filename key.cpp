@@ -237,12 +237,12 @@ int main(){
 	int N = 128; //key size
 	int key[128];
 
-	for(int i = 0; i<128; i++){
+	for(int i = 0; i<128; i++){///128 zero's as the key
 	key[i] = 0;
 }
 	for (int n = 0; n<128; n++){
 	  int i  = rand()%2;
-	  //key[n] = i;
+	  key[n] = i;
 	  //cout << key[n];
 	  outfile<<key[n];
 	}
@@ -382,33 +382,36 @@ int subkeys[39];
 int subkey;
 for(int i = 0; i<40; i++){
 	if(i%2 == 0){
-		outfile<<"even:"<<hWords[i]<<endl;
+		//outfile<<"even:"<<hWords[i]<<endl;
 		subkey = hFunction(hWords[i],Meven);
 	}
 	else{
-		outfile<<"odd:"<<hWords[i]<<endl;
+		//outfile<<"odd:"<<hWords[i]<<endl;
 		subkey = ROL8(hFunction(hWords[i],Modd));
 	}
 	subkeys[i] = subkey;
-	outfile<<i<<" "<<subkeys[i]<<endl;
+	//outfile<<i<<" "<<subkeys[i]<<endl;
 	//cout<<i<<" "<< subkeys[i]<<" end "<<endl;
 }
 
-	int roundKeys[39];
+	unsigned int roundKeys[39];
 	for(int i = 0; i<40; i++){
 		if(i%2 ==0){
 			roundKeys[i] = (subkeys[i] + subkeys[i+1])%4294967296;
 		}
 		else{
-			roundKeys[i]= ROL9((subkeys[i-1]+2*subkeys[i])%4294967296);
+
+			unsigned int math = subkeys[i-1]+2*subkeys[i];
+			math = math%4294967296;
+			roundKeys[i] = ROL9(math);
+
 		}
 		//cout<<i<<" "<<roundKeys[i]<<endl;
 	}
 	outfile<<"OFFICIAL KEYS:"<<endl;
 	for (int i = 0; i<40; i++){
-		outfile<<roundKeys[i]<<endl;
+		outfile<<std::dec<<i<<":"<<std::dec<<roundKeys[i]<<", "<<std::hex<<roundKeys[i]<<endl;
 }
-
 	//int evenkey = (hFunction(hWords[17], Meven));
 
 	// + hFunction(sArrays[0][0], Modd))%32;
