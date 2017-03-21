@@ -228,7 +228,33 @@ int main(){
 	for (int i = 0; i<128; i++){
 		//cout <<message[i]; //prints message
 	}
-	//cout <<"\n";
+	//split message into 4 x 32 bit words
+	int p0[32];
+	int p1[32];
+	int p2[32];
+	int p3[32];
+	for(int i=0; i<32; i++){
+		p0[i] = message[i];
+	}
+	int place = 0;
+	for(int i=32; i<64; i++){
+		p1[place] = message[i];
+		place++;
+	}
+	cout<<"\n";
+	place = 0;
+	for(int i = 64; i<96; i++){
+		p2[place] = message[i];
+		place++;
+
+	}
+	place = 0;
+	for(int i = 96; i<128; i++){
+		p3[place] = message[i];
+		place++;
+	}
+
+
 	outfile<<"THE KEY"<<endl;
 
 
@@ -453,8 +479,9 @@ for(int i = 0; i<40; i++){
 		sboxes[3][i] = hFunction(i,sArrayBit);
 
 	}
-
-
-
+//Input Whitening
+//16 rounds
+//Output Whitening
+//Ciphertext TADA
 }
 
