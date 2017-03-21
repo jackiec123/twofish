@@ -46,7 +46,6 @@ int q0Permutation(int x){//THIS IS WHERE THE ERROR IS ALWAYS OUPTUTS SAME ANSWER
 					0xd,0x7,0xf,0x4,0x1,0x2,0x6,0xe,0x9,0xb,0x3,0x0,0x8,0x5,0xc,0xa};
 		int a0 = x/16;//130
 		int b0 = (x%16);//2
-		cout<<"BOO"<<b0<<endl;
 		int a1 = a0^b0;//xor	128
 		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 138
 		int a2 = fixedSboxQ0[0][a1];//but 138 is 1 byte and sboxes take 4 bits
@@ -90,7 +89,7 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 				 0xEF,0x5B,0x01,0xEF,
 				 0xEF,0x01,0xEF,0x5B};
 
-				 cout<<"MAYVALUE"<<x<<endl;
+				 //cout<<"MAYVALUE"<<x<<endl;
 	int m0[7];
 	int m1[7];
 	int m2[7];
@@ -121,7 +120,7 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 	decimalList[2]=decimal(m2);
 	decimalList[3]=decimal(m3);
 	for(int i = 0; i<4; i++){
-		cout<<decimalList[i]<<endl;
+		//cout<<decimalList[i]<<endl;
 	}
 
 	int words[3];
@@ -130,7 +129,7 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 	words[2]=x;
 	words[3]=x;
 
-	cout<<"THE X VALUE:"<<x<<endl;
+	//cout<<"THE X VALUE:"<<x<<endl;
 
 
 	words[0] = q0Permutation(words[0]);
@@ -140,9 +139,9 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 
 
 	for(int i = 0; i<4; i++){
-		cout<<i<<":"<<words[i]<<endl;
+		//cout<<i<<":"<<words[i]<<endl;
 		words[i] = words[i]^decimalList[i]; 
-		cout<<"DOUBLE CHECK"<<words[i]<<endl;//XOR first Meven(M2)with the word
+		//cout<<"DOUBLE CHECK"<<words[i]<<endl;//XOR first Meven(M2)with the word
 	}
 	
 	words[0] = q0Permutation(words[0]);
@@ -184,9 +183,9 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 
  	int stage2Words[3];
 	for(int i = 0; i<4; i++){
-		cout<<"2nd stage:"<<words[i]<<"XOR"<<decimalList[i]<<endl;
+		//cout<<"2nd stage:"<<words[i]<<"XOR"<<decimalList[i]<<endl;
 		stage2Words[i] = words[i]^decimalList[i]; //XOR first Meven(M0)with the word
-		cout<<"Result:"<<stage2Words[i]<<endl;
+		//cout<<"Result:"<<stage2Words[i]<<endl;
 	}
 	
 	words[0] = q0Permutation(stage2Words[0]);
@@ -194,7 +193,7 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 	words[2] = q1Permutation(stage2Words[2]);
 	words[3] = q0Permutation(stage2Words[3]);
 	for(int i = 0; i<4; i++){
-		cout<<"THEFINAL:"<<words[i]<<endl;
+		//cout<<"THEFINAL:"<<words[i]<<endl;
 	}
 
 	//Now multiply words array by MDS matrix and add em up!
@@ -210,7 +209,7 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 		
 	}
 	int end = toBeAdded[0]+toBeAdded[1]+toBeAdded[2]+toBeAdded[3];
-	cout<<"theEnd?:"<<end<<endl;
+	//cout<<"theEnd:"<<end<<endl;
 	return end;
 
 }
@@ -252,7 +251,7 @@ outfile<<"\n";
 	int k = N/64;
 	
 	//cout<<k;
-	cout<<"\n";
+	//cout<<"\n";
 
 	//Divide message into 2k words of 32 bits, so 4 words
 	int Meven[1][32];
@@ -301,8 +300,7 @@ outfile<<"\n";
 		}
 		outfile<<"\n";
 	}
-	//cout<<M0[0]<<endl;
-	//cout<<Meven[0][0]<<endl;
+	
 	
 	//Reed Solomon Matrix
 	int RS[4][8] = 
@@ -310,7 +308,7 @@ outfile<<"\n";
 	0xA4,0x56,0x82,0xF3,0x1E,0xC6,0x68,0xE5,
 	0x02,0xA1,0xFC,0xC1,0x47,0xAE,0x3D,0x19,
 	0xA4,0x55,0x87,0x5A,0x58,0xDB,0x9E,0x03};
-	//cout<<RS[0][8]<<endl;
+	
 	//generates the two 8x1(byte) vectors that are multiplied by RS Matrix
 	int vector1[2][8][8];//[vector][row][byte]
 	int firstVector[8];
@@ -337,27 +335,62 @@ outfile<<"\n";
 		}
 	}
 	//Third Vector Mult. of RS(hexadecimal) and Vector(reg. decimal) from key
-	//RECALL: sArray has second vector first (which is odd)
-	int sArrays[2][4];
+	//RECALL: sArray has second vector first (which is odd) (and i did this) NEED TO CONVERT TO 2 WORDS OF 32 BITS
+	int sArrays[1][3];
+	unsigned int sArrayDec[1];
+	int sArrayBit[1][32];
+	unsigned int sum1 = 0;
+
 	for(int c = 0; c<2; c++){
+		unsigned int sum2 = 0;
 		for(int l = 0; l<4; l++){
 			int sum = 0;
+
 			
-			for (int j = 0; j<8; j++){
+			for (int j = 0; j<8; j++){//MATRIX MULTIPLCATION - RESULT 4 X 8BITS
 				if(c == 0){
 					sum = sum + RS[l][j]*firstVector[j];
 					sArrays[1][l] = sum;
+					sum1 = sum1 + sum;
 				}
+			 	
 				if(c ==1){
 					sum = sum + RS[l][j]*secondVector[j];
 					sArrays[0][l] = sum;
+					sum2 = sum2 + sum;
 				}
+				sArrayDec[0] = sum2;
 			}
 		}
-	}//so i now found the S vector
-	//cout<<hFunction(sArrays[0][0], Meven)<<endl;
-	//cout<<hFunction(sArrays[1][0], Modd)<<endl;
+		sArrayDec[1] = sum1;
+	}
+	//converting decimal to binary
+	outfile<<"SVector"<<sArrayDec[0]<<" & "<<sArrayDec[1]<<endl;
+	int rem;
+	int quotient;
+	int num = 31;
+	for(int i = 0; i<2;i++){
+		num = 31;
+		quotient = 0;
+		rem = 0;
+		while ( num !=-1){
 
+			quotient = sArrayDec[i]/2;
+			rem = sArrayDec[i] - quotient * 2;
+			sArrayBit[i][num] = rem;
+			sArrayDec[i] = quotient;
+			num = num -1;
+		}
+		
+		}
+	outfile<<"S[0]:";
+
+	for(int j = 0; j<2; j++){
+	for(int i = 0; i<32;i++){
+		outfile<<sArrayBit[j][i];
+	}	
+	outfile<<"\n S[1]:";
+}
 	
 
 	int p = 16843009;
@@ -371,8 +404,7 @@ outfile<<"\n";
 		word = (2*round + 1); //got rid of*p;
 	}
 		hWords[round] = word;
-		//cout<<round<<" ";
-		//cout<<word<<endl;
+		
 }
 
 
@@ -412,13 +444,15 @@ for(int i = 0; i<40; i++){
 	for (int i = 0; i<40; i++){
 		outfile<<std::dec<<i<<":"<<std::dec<<roundKeys[i]<<", "<<std::hex<<roundKeys[i]<<endl;
 }
-	//int evenkey = (hFunction(hWords[17], Meven));
+//generates 4 S-boxes for the g function :)
+	int sboxes[4][256];
+	for(int i=0;i<256; i++){
+		sboxes[0][i] = hFunction(i,sArrayBit);
+		sboxes[1][i] = hFunction(i,sArrayBit);
+		sboxes[2][i] = hFunction(i,sArrayBit);
+		sboxes[3][i] = hFunction(i,sArrayBit);
 
-	// + hFunction(sArrays[0][0], Modd))%32;
-	//int oddkey = ((hFunction(sArrays[0][0], Meven) + hFunction(sArrays[0][0], Modd))%32)<<9;
-	//cout<<"k0 = "<<evenkey<<endl;
-	//cout<<"k1 = "<<oddkey<<endl;
-
+	}
 
 
 
