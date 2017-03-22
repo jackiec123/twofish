@@ -19,6 +19,15 @@ int decimal(int byteArray[]){
 	}
 	return decimal; 
 }
+int largeDecimal(int byteArray[]){
+	int largeDecimal = 0;
+	for(int i = 0; i<32; i++){
+		if(byteArray[i] ==1){
+			largeDecimal = largeDecimal + byteArray[i] * pow(2,i);
+		}
+	}
+	return largeDecimal;
+}
 
 unsigned int ROR4(unsigned int x){
 	for(int i = 0; i<1; i++){            
@@ -89,12 +98,12 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 				 0xEF,0x5B,0x01,0xEF,
 				 0xEF,0x01,0xEF,0x5B};
 
-				 //cout<<"MAYVALUE"<<x<<endl;
 	int m0[7];
 	int m1[7];
 	int m2[7];
 	int m3[7];
-//takes M2 or M3(for odd) and divides into bytes which will be converted to decimal
+//takes M2 or M3(for odd) and divides into bytes which will be converted to decimal - for round keys
+	//takes S vector - for key dependent s-boxes
 	for (int i = 0; i<8; i++){
 		m0[i] = listM[1][i];
 	}
@@ -279,7 +288,7 @@ outfile<<"\n";
 	//cout<<k;
 	//cout<<"\n";
 
-	//Divide message into 2k words of 32 bits, so 4 words
+	//Divide 128 bit key into 2k words of 32 bits, so 4 words
 	int Meven[1][32];
 	int Modd[1][32];
 	int M0[32]; //bits 0-31 from key array
@@ -291,7 +300,6 @@ outfile<<"\n";
 	for (int i = 0; i<32; i++){
 		M0[i] = key[i];
 		Meven[0][i]=key[i];
-		//cout<<M0[i];
 		outfile<<M0[i];
 	}
 	int j = 0;
@@ -307,7 +315,6 @@ outfile<<"\n";
 	for (int i = 64; i<96; i++){
 		M2[j] = key[i];
 		Meven[1][j]=key[i];
-		//cout<<Meven[1][j];
 		outfile<<M2[j];
 		j++;
 	}
@@ -479,7 +486,12 @@ for(int i = 0; i<40; i++){
 		sboxes[3][i] = hFunction(i,sArrayBit);
 
 	}
-//Input Whitening
+//Input Whitening - pre fiestal rounds
+unsigned int r0, r1, r2, r3;
+r0 = largeDecimal(p0)^subkeys[0];
+r1 = largeDecimal(p1)^subkeys[1];
+r2 = largeDecimal(p2)^subkeys[2];
+r3 = largeDecimal(p3)^subkeys[3];
 //16 rounds
 //Output Whitening
 //Ciphertext TADA
