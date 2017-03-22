@@ -9,7 +9,7 @@
 #include <fstream>
 using namespace std;
 
-//NEED TO DOULE CHECK ALL READIN FOR BINARY ARRAYS MUST FOLLOW SAME THROUGHOUT
+//NEED TO DOULE CHECK ALL READIN FOR BINARY ARRAYS MUST FOLLOW SAME THROUGHOUT -- little endian
 int decimal(int byteArray[]){
 	int decimal = 0;
 	for(int i = 0; i<8; i++){
@@ -19,6 +19,7 @@ int decimal(int byteArray[]){
 	}
 	return decimal; 
 }
+//convertsion for 32 bit numbers
 int largeDecimal(int byteArray[]){
 	int largeDecimal = 0;
 	for(int i = 0; i<32; i++){
@@ -28,7 +29,7 @@ int largeDecimal(int byteArray[]){
 	}
 	return largeDecimal;
 }
-
+//ALL MY ROTATIONS 
 unsigned int ROR4(unsigned int x){
 	for(int i = 0; i<1; i++){            
 		x = (x & 1)<<3|(x>>1);
@@ -43,12 +44,20 @@ unsigned int ROL8(unsigned int x){
 }
 unsigned int ROL9(unsigned int x){
 	for(int i = 0; i<9; i++){
-		x = (x>>31)|(x<<1);
+		x = ((x &1)>>31)|(x<<1);
 	}
 	return x;
 }
+unsigned int ROL1(unsigned int x){
+	x = (x>>31)|(x<<1);	
+	return x;
+}
+unsigned int ROR1(unsigned int x){
+	x = ((x&1)<<31)|(x>>1)&0x7FFFFFFF;
+	return x;
+}
 
-int q0Permutation(int x){//THIS IS WHERE THE ERROR IS ALWAYS OUPTUTS SAME ANSWER, WHAT DO WE TAKE IN
+int q0Permutation(int x){
 	int fixedSboxQ0[4][16]={0x8,0x1,0x7,0xd,0x6,0xf,0x3,0x2,0x0,0xb,0x5,0x9,0xe,0xc,0xa,0x4,
 					0xe,0xc,0xb,0x8,0x1,0x2,0x3,0x5,0xf,0x4,0xa,0x6,0x7,0x0,0x9,0xd,
 					0xb,0xa,0x5,0xe,0x6,0xd,0x9,0x0,0xc,0x8,0xf,0x3,0x2,0x4,0x7,0x1,
@@ -220,6 +229,10 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 	int end = toBeAdded[0]+toBeAdded[1]+toBeAdded[2]+toBeAdded[3];
 	//cout<<"theEnd:"<<end<<endl;
 	return end;
+
+}
+
+int gFunction(){
 
 }
 
@@ -492,8 +505,12 @@ r0 = largeDecimal(p0)^subkeys[0];
 r1 = largeDecimal(p1)^subkeys[1];
 r2 = largeDecimal(p2)^subkeys[2];
 r3 = largeDecimal(p3)^subkeys[3];
+cout<<r0<<" "<<r1<<endl;
+cout<<ROR1(r0)<<endl;
+cout<<ROR1(r1)<<endl;
+cout<<ROR1(r2)<<endl;
 //16 rounds
 //Output Whitening
 //Ciphertext TADA
 }
-
+//TODO - FIX ROTATIONS AND CHECK ALL BITARRAYS ARE INPUTTED CORRECTLY
