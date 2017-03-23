@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cstdlib>
 #include <math.h>
-#include <bitset>
 #include <sstream>
 #include <iomanip>
 #include <stdlib.h>
@@ -20,8 +19,8 @@ int decimal(int byteArray[]){
 	return decimal; 
 }
 //convertsion for 32 bit numbers
-int largeDecimal(int byteArray[]){
-	int largeDecimal = 0;
+unsigned int largeDecimal(unsigned int byteArray[]){
+	unsigned int largeDecimal = 0;
 	for(int i = 0; i<32; i++){
 		if(byteArray[i] ==1){
 			largeDecimal = largeDecimal + byteArray[i] * pow(2,i);
@@ -65,11 +64,11 @@ int q0Permutation(int x){
 		int a0 = x/16;//130
 		int b0 = (x%16);//2
 		int a1 = a0^b0;//xor	128
-		int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 138
+		unsigned int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 138
 		int a2 = fixedSboxQ0[0][a1];//but 138 is 1 byte and sboxes take 4 bits
 		int b2 = fixedSboxQ0[1][b1];
 		int a3 = a2^b2;
-		int b3 = (a2^(ROR4(b2)))^((8*a2)%16);//--used the ROR4 defined fxn
+		unsigned int b3 = (a2^(ROR4(b2)))^((8*a2)%16);//--used the ROR4 defined fxn
 		int a4 = fixedSboxQ0[2][a3];
 		int b4 = fixedSboxQ0[3][b3];
 		int y = 16*b4 + a4;
@@ -100,7 +99,7 @@ int q1Permutation(int x){
 	
 }
 //To obtain the round keys
-int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte which we duplicate here) & either Meven/Modd(list(2) of 32bit words)
+int hFunction(unsigned int x,unsigned int listM[1][32]){ //takes in 32 bit word(now just 1 byte which we duplicate here) & either Meven/Modd(list(2) of 32bit words)
 	//for Meven M0 is listM[0][], M2 is listM[1]
 	int MDS[4][4] = {0x01,0xEF,0x5B,0x5B,
 				 0x5B,0xEF,0xEF,0x01,
@@ -232,9 +231,52 @@ int hFunction(int x,int listM[1][32]){ //takes in 32 bit word(now just 1 byte wh
 
 }
 
-int gFunction(){
+unsigned int gFunction(unsigned int a0, unsigned int a1,unsigned int a2, unsigned int a3){
+	int MDS[4][4] = {0x01,0xEF,0x5B,0x5B,
+				 0x5B,0xEF,0xEF,0x01,
+				 0xEF,0x5B,0x01,0xEF,
+				 0xEF,0x01,0xEF,0x5B};
+	unsigned int word[3];
+	word[0]=a0;
+	word[1]=a1;
+	word[2]=a2;
+	word[3]=a3;
+	
+
+	int toBeAdded[4];
+	for(int j = 0; j<4; j++){
+		int sum=0;
+		for(int i = 0; i<4; i++){
+			sum = sum + MDS[j][i]*word[i];
+			//cout<<MDS[j][i]<<"*"<<words[i]<<endl;
+		}
+			toBeAdded[j] = sum;
+			//cout<<"words[j]:"<<toBeAdded[j]<<endl;		
+	}
+	unsigned int end = toBeAdded[0]+toBeAdded[1]+toBeAdded[2]+toBeAdded[3];
+	return end;
+	//cout<<end<<endl;
+}
+
+int pht(int t, int a, int b, int k){
+	int end;
+	if(t == 0){
+		end = a + b;
+	}
+	if(t==1){
+		end = a+2*b;
+	}	
+	end = end +k;
+	end = end%(4294967296);
+
+	return end;
+}
+
+int fFunction(){
 
 }
+
+
 
 
 int main(){
@@ -243,7 +285,7 @@ int main(){
 
 	//Message "encrypt twofish!" in binary
 	//Message is 128 bits for now, but can be any with padding
-	int message[128]={0,1,1,0,0,1,0,1,0,1,1,0,1,1,1,0,0,1,1,0,0,0,1,1, 
+	unsigned int message[128]={0,1,1,0,0,1,0,1,0,1,1,0,1,1,1,0,0,1,1,0,0,0,1,1, 
 		0,1,1,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,1,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,0,0,
 		0,0,0,0,1,1,1,0,1,0,0,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,
 		0,1,0,0,1,0,1,1,1,0,0,1,1,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1};
@@ -251,10 +293,10 @@ int main(){
 		//cout <<message[i]; //prints message
 	}
 	//split message into 4 x 32 bit words
-	int p0[32];
-	int p1[32];
-	int p2[32];
-	int p3[32];
+	unsigned int p0[32];
+	unsigned int p1[32];
+	unsigned int p2[32];
+	unsigned int p3[32];
 	for(int i=0; i<32; i++){
 		p0[i] = message[i];
 	}
@@ -282,7 +324,7 @@ int main(){
 
 	//generate 128 bit key, N=128,192, 256. can set this in the future, for now its 128
 	int N = 128; //key size
-	int key[128];
+	unsigned int key[128];
 
 	for(int i = 0; i<128; i++){///128 zero's as the key
 	key[i] = 0;
@@ -302,12 +344,12 @@ outfile<<"\n";
 	//cout<<"\n";
 
 	//Divide 128 bit key into 2k words of 32 bits, so 4 words
-	int Meven[1][32];
-	int Modd[1][32];
-	int M0[32]; //bits 0-31 from key array
-	int M1[32]; //bits 32-63
-	int M2[32];
-	int M3[32];
+	unsigned int Meven[1][32];
+	unsigned int Modd[1][32];
+	unsigned int M0[32]; //bits 0-31 from key array
+	unsigned int M1[32]; //bits 32-63
+	unsigned int M2[32];
+	unsigned int M3[32];
 	//cout<< pow (2.0, 0);
 	outfile<<"M0: ";
 	for (int i = 0; i<32; i++){
@@ -356,9 +398,9 @@ outfile<<"\n";
 	0xA4,0x55,0x87,0x5A,0x58,0xDB,0x9E,0x03};
 	
 	//generates the two 8x1(byte) vectors that are multiplied by RS Matrix
-	int vector1[2][8][8];//[vector][row][byte]
-	int firstVector[8];
-	int secondVector[8];
+	unsigned int vector1[2][8][8];//[vector][row][byte]
+	unsigned int firstVector[8];
+	unsigned int secondVector[8];
 
 	for (int i = 0; i<2; i++){
 		for (int j = 0; j<8; j++){
@@ -382,9 +424,9 @@ outfile<<"\n";
 	}
 	//Third Vector Mult. of RS(hexadecimal) and Vector(reg. decimal) from key
 	//RECALL: sArray has second vector first (which is odd) (and i did this) NEED TO CONVERT TO 2 WORDS OF 32 BITS
-	int sArrays[1][3];
+	unsigned int sArrays[1][3];
 	unsigned int sArrayDec[1];
-	int sArrayBit[1][32];
+	unsigned int sArrayBit[1][32];
 	unsigned int sum1 = 0;
 
 	for(int c = 0; c<2; c++){
@@ -439,9 +481,9 @@ outfile<<"\n";
 }
 	
 
-	int p = 16843009;
-	int word;
-	int hWords[40];
+	unsigned int p = 16843009;
+	unsigned int word;
+	unsigned int hWords[40];
  	for(int round = 0; round<40; round++){
 		if(round%2 == 0){
 		word = 2*round;//Got rid of *p;
@@ -456,8 +498,8 @@ outfile<<"\n";
 
 
 //Actually obtains 40 subkeys and places in array 
-int subkeys[39];
-int subkey;
+unsigned int subkeys[39];
+unsigned int subkey;
 for(int i = 0; i<40; i++){
 	if(i%2 == 0){
 		//outfile<<"even:"<<hWords[i]<<endl;
@@ -488,9 +530,9 @@ for(int i = 0; i<40; i++){
 	}
 	outfile<<"OFFICIAL KEYS:"<<endl;
 	for (int i = 0; i<40; i++){
-		outfile<<std::dec<<i<<":"<<std::dec<<roundKeys[i]<<", "<<std::hex<<roundKeys[i]<<endl;
+		outfile<<std::dec<<i<<":"<<std::dec<<roundKeys[i]<<", "<<hex<<uppercase<<roundKeys[i]<<endl;
 }
-//generates 4 S-boxes for the g function :)
+//generates 4 S-boxes for the g function :) takes in 8 its and outputs 8 bits
 	int sboxes[4][256];
 	for(int i=0;i<256; i++){
 		sboxes[0][i] = hFunction(i,sArrayBit);
@@ -505,12 +547,55 @@ r0 = largeDecimal(p0)^subkeys[0];
 r1 = largeDecimal(p1)^subkeys[1];
 r2 = largeDecimal(p2)^subkeys[2];
 r3 = largeDecimal(p3)^subkeys[3];
-cout<<r0<<" "<<r1<<endl;
-cout<<ROR1(r0)<<endl;
-cout<<ROR1(r1)<<endl;
-cout<<ROR1(r2)<<endl;
-//16 rounds
-//Output Whitening
-//Ciphertext TADA
+
+//the 16 rounds
+for(int i =0; i<16; i++){
+	r3 = ROL1(r3);
+	r1 = ROL8(r1);
+	unsigned int a0 = (r0>>24) & 0xff;			 
+	unsigned int a1 = (r0>>16)& 0xff;
+	unsigned int a2 = (r0>>8) & 0xff;
+	unsigned int a3 = r0 & 0xff;
+	a0 = sboxes[0][a0];
+	a1 = sboxes[0][a1];
+	a2 = sboxes[0][a2];
+	a3 = sboxes[0][a3];
+	unsigned int a = gFunction(a0,a1,a2,a3); //from r0
+
+	unsigned int b0 = (r1>>24) & 0xff;			 
+	unsigned int b1 = (r1>>16)& 0xff;
+	unsigned int b2 = (r1>>8) & 0xff;
+	unsigned int b3 = r1 & 0xff;
+	b0 = sboxes[0][b0];
+	b1 = sboxes[0][b1];
+	b2 = sboxes[0][b2];
+	b3 = sboxes[0][b3];
+	cout<<b0<<" "<<b1<<" "<<b2<<" "<<b3<<endl;
+	unsigned int b = gFunction(b0,b1,b2,b3); //from r2
+	a = pht(0,a,b,subkeys[2*i+8]);
+	b = pht(1,a,b,subkeys[2*i+9]);
+	r2 = a^r2;
+	r3 = b^r3;
+	
+	a = ROL1(a);
+	//now we swap for the next round
+	int copyr0 = r0;
+	r0 = r2;
+	r2 = copyr0;
+	int copyr1 = r1;
+	r1 = r3;
+	r3 = copyr1;
+
 }
-//TODO - FIX ROTATIONS AND CHECK ALL BITARRAYS ARE INPUTTED CORRECTLY
+
+cout<<r0<<endl;
+//Output Whitening
+unsigned int c0 = r0^subkeys[4];
+unsigned int c1 = r1^subkeys[5];
+unsigned int c2 = r2^subkeys[6];
+unsigned int c3 = r3^subkeys[7];
+
+//Ciphertext TADA
+//need to combine 4x32 bits to get 128 bit ciphertext!
+}
+//TODO - CHECK ALL BITARRAYS ARE INPUTTED CORRECTLY
