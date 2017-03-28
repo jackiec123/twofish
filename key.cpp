@@ -11,7 +11,7 @@ using namespace std;
 //NEED TO DOULE CHECK ALL READIN FOR BINARY ARRAYS MUST FOLLOW SAME THROUGHOUT -- little endian
 int decimal(int byteArray[]){
 	int decimal = 0;
-	for(int i = 0; i<8; i++){
+	for(int i = 7; i>-1; i--){
 		if(byteArray[i] ==1){
 		decimal = decimal + byteArray[i] * pow(2,i);
 		}
@@ -21,7 +21,8 @@ int decimal(int byteArray[]){
 //convertsion for 32 bit numbers
 unsigned int largeDecimal(unsigned int byteArray[]){
 	unsigned int largeDecimal = 0;
-	for(int i = 0; i<32; i++){
+	for(int i = 31; i>-1; i--){
+		//cout<<byteArray[i]<<endl;
 		if(byteArray[i] ==1){
 			largeDecimal = largeDecimal + byteArray[i] * pow(2,i);
 		}
@@ -31,7 +32,7 @@ unsigned int largeDecimal(unsigned int byteArray[]){
 //ALL MY ROTATIONS 
 unsigned int ROR4(unsigned int x){
 	for(int i = 0; i<1; i++){            
-		x = (x & 1)<<3|(x>>1);
+		x = (x & 1)<<3|(x>>1)&0x7;
 	}
 	return x;
 }
@@ -44,6 +45,7 @@ unsigned int ROL8(unsigned int x){
 unsigned int ROL9(unsigned int x){
 	for(int i = 0; i<9; i++){
 		x = ((x &1)>>31)|(x<<1);
+		//x = (x>>31)|(x<<1);
 	}
 	return x;
 }
@@ -64,7 +66,8 @@ int q0Permutation(int x){
 		int a0 = x/16;//130
 		int b0 = (x%16);//2
 		int a1 = a0^b0;//xor	128
-		unsigned int b1 = (a0^(ROR4(b0)))^((8*a0)%16);//% is int mod!!!//need to rotate 4 bit values 138
+		unsigned int b1 = (a0^(ROR4(b0)))^((8*a0)%16);
+		//% is int mod!!!//need to rotate 4 bit values 138
 		int a2 = fixedSboxQ0[0][a1];//but 138 is 1 byte and sboxes take 4 bits
 		int b2 = fixedSboxQ0[1][b1];
 		int a3 = a2^b2;
@@ -328,12 +331,13 @@ int main(){
 
 	for(int i = 0; i<128; i++){///128 zero's as the key
 	key[i] = 0;
+outfile<<key[i];
 }
 	for (int n = 0; n<128; n++){
 	  int i  = rand()%2;
-	  key[n] = i;
+	  //key[n] = i;
 	  //cout << key[n];
-	  outfile<<key[n];
+	  //outfile<<key[n];
 	}
 outfile<<"\n";
 
@@ -510,7 +514,7 @@ for(int i = 0; i<40; i++){
 		subkey = ROL8(hFunction(hWords[i],Modd));
 	}
 	subkeys[i] = subkey;
-	//outfile<<i<<" "<<subkeys[i]<<endl;
+	outfile<<i<<" "<<subkeys[i]<<endl;
 	//cout<<i<<" "<< subkeys[i]<<" end "<<endl;
 }
 
@@ -570,7 +574,7 @@ for(int i =0; i<16; i++){
 	b1 = sboxes[0][b1];
 	b2 = sboxes[0][b2];
 	b3 = sboxes[0][b3];
-	cout<<b0<<" "<<b1<<" "<<b2<<" "<<b3<<endl;
+	//cout<<b0<<" "<<b1<<" "<<b2<<" "<<b3<<endl;
 	unsigned int b = gFunction(b0,b1,b2,b3); //from r2
 	a = pht(0,a,b,subkeys[2*i+8]);
 	b = pht(1,a,b,subkeys[2*i+9]);
@@ -588,12 +592,38 @@ for(int i =0; i<16; i++){
 
 }
 
-cout<<r0<<endl;
+//cout<<r0<<endl;
+unsigned int cipher[4];
 //Output Whitening
-unsigned int c0 = r0^subkeys[4];
-unsigned int c1 = r1^subkeys[5];
-unsigned int c2 = r2^subkeys[6];
-unsigned int c3 = r3^subkeys[7];
+cipher[0] = r0^subkeys[4];
+cipher[1] = r1^subkeys[5];
+cipher[2] = r2^subkeys[6];
+cipher[3] = r3^subkeys[7];
+
+unsigned int ciphertext[4][32];
+rem;
+quotient;
+num = 31;
+	for(int i = 0; i<4;i++){
+		num = 31;
+		quotient = 0;
+		rem = 0;
+		while ( num !=-1){
+
+			quotient = cipher[i]/2;
+			rem = cipher[i] - quotient * 2;
+	 		ciphertext[i][num] = rem;
+			cipher[i] = quotient;
+			num = num -1;
+		}
+		
+		}
+for(int i = 0; i<4; i++){
+	for (int j = 0; j<32; j++){
+		outfile<<ciphertext[i][j];
+	}
+	outfile<<" "<<endl;
+}
 
 //Ciphertext TADA
 //need to combine 4x32 bits to get 128 bit ciphertext!
