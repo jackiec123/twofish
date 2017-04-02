@@ -599,33 +599,74 @@ cipher[0] = r0^subkeys[4];
 cipher[1] = r1^subkeys[5];
 cipher[2] = r2^subkeys[6];
 cipher[3] = r3^subkeys[7];
+for(int i =0; i<4; i++){
+	cout<<cipher[i]<<endl;
+}
 
-unsigned int ciphertext[4][32];
+unsigned int ciphertext1[128];
 rem;
 quotient;
-num = 31;
+num = 0;
 	for(int i = 0; i<4;i++){
-		num = 31;
 		quotient = 0;
 		rem = 0;
-		while ( num !=-1){
+		int spot = 31;
+		while ( num <(i+1)*32){
 
 			quotient = cipher[i]/2;
 			rem = cipher[i] - quotient * 2;
-	 		ciphertext[i][num] = rem;
+	 		ciphertext1[spot+(i*32)] = rem;
 			cipher[i] = quotient;
-			num = num -1;
+			num = num +1;
+			spot = spot -1;
 		}
 		
 		}
-for(int i = 0; i<4; i++){
-	for (int j = 0; j<32; j++){
-		outfile<<ciphertext[i][j];
+//for(int i = 0; i<4; i++){
+	for (int j = 0; j<128; j++){
+		outfile<<ciphertext1[j];
 	}
 	outfile<<" "<<endl;
+//}
+//Decryption Portion:
+//Divide ciphertext into 4 32 bit chunks
+unsigned int c0[32];
+unsigned int c1[32];
+unsigned int c2[32];
+unsigned int c3[32];
+int spot = 0;
+for(int i=31; i>-1; i--){
+	c0[spot] = ciphertext1[i];
+	spot = spot +1;
 }
+ place = 0;
 
-//Ciphertext TADA
-//need to combine 4x32 bits to get 128 bit ciphertext!
+for(int i=63; i>31; i--){
+	c1[place] = ciphertext1[i];
+		place++;
+	}
+	cout<<"\n";
+	place = 0;
+	for(int i = 95; i>64; i--){
+		c2[place] = ciphertext1[i];
+		place++;
+
+	}
+	place = 0;
+	for(int i = 127; i>95; i--){
+		c3[place] = ciphertext1[i];
+		place++;
+	}
+//Reverse output whitening
+
+unsigned int a =largeDecimal(c0)^subkeys[4];
+unsigned int b = largeDecimal(c1)^subkeys[5];
+unsigned int c = largeDecimal(c2)^subkeys[6];
+unsigned int d = largeDecimal(c3)^subkeys[7];
+cout<<d<<endl;
+cout<<r3<<endl;
+//Now lets reverse the rounds
+
+
 }
 //TODO - CHECK ALL BITARRAYS ARE INPUTTED CORRECTLY
