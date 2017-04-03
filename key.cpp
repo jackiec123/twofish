@@ -275,9 +275,6 @@ int pht(int t, int a, int b, int k){
 	return end;
 }
 
-int fFunction(){
-
-}
 
 
 
@@ -292,8 +289,9 @@ int main(){
 		0,1,1,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,1,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,0,0,
 		0,0,0,0,1,1,1,0,1,0,0,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,
 		0,1,0,0,1,0,1,1,1,0,0,1,1,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1};
+		outfile<<"M:"<<endl;
 	for (int i = 0; i<128; i++){
-		//cout <<message[i]; //prints message
+		outfile<<message[i]; //prints message
 	}
 	//split message into 4 x 32 bit words
 	unsigned int p0[32];
@@ -320,7 +318,7 @@ int main(){
 		p3[place] = message[i];
 		place++;
 	}
-
+	outfile<<largeDecimal(p0)<<" "<<largeDecimal(p1)<<" "<<largeDecimal(p2)<<" "<<largeDecimal(p3)<<endl;
 
 	outfile<<"THE KEY"<<endl;
 
@@ -551,11 +549,16 @@ r0 = largeDecimal(p0)^subkeys[0];
 r1 = largeDecimal(p1)^subkeys[1];
 r2 = largeDecimal(p2)^subkeys[2];
 r3 = largeDecimal(p3)^subkeys[3];
+cout<<r0<<" "<<r1<<" "<<r2<<" "<<" "<<r3<<endl;
 
 //the 16 rounds
 for(int i =0; i<16; i++){
+	
+
 	r3 = ROL1(r3);
-	r1 = ROL8(r1);
+
+	unsigned int r11 = ROL8(r1);
+
 	unsigned int a0 = (r0>>24) & 0xff;			 
 	unsigned int a1 = (r0>>16)& 0xff;
 	unsigned int a2 = (r0>>8) & 0xff;
@@ -565,24 +568,47 @@ for(int i =0; i<16; i++){
 	a2 = sboxes[0][a2];
 	a3 = sboxes[0][a3];
 	unsigned int a = gFunction(a0,a1,a2,a3); //from r0
+	if(i==15){
+		cout<<"enc a"<<a<<endl;
+	}
 
-	unsigned int b0 = (r1>>24) & 0xff;			 
-	unsigned int b1 = (r1>>16)& 0xff;
-	unsigned int b2 = (r1>>8) & 0xff;
-	unsigned int b3 = r1 & 0xff;
+	unsigned int b0 = (r11>>24) & 0xff;			 
+	unsigned int b1 = (r11>>16)& 0xff;
+	unsigned int b2 = (r11>>8) & 0xff;
+	unsigned int b3 = r11 & 0xff;
 	b0 = sboxes[0][b0];
 	b1 = sboxes[0][b1];
 	b2 = sboxes[0][b2];
 	b3 = sboxes[0][b3];
 	//cout<<b0<<" "<<b1<<" "<<b2<<" "<<b3<<endl;
 	unsigned int b = gFunction(b0,b1,b2,b3); //from r2
+	if(i==15){
+	cout<<"enc b"<<b<<endl;
+}
+	unsigned int copya = a;
 	a = pht(0,a,b,subkeys[2*i+8]);
-	b = pht(1,a,b,subkeys[2*i+9]);
-	r2 = a^r2;
+	b = pht(1,copya,b,subkeys[2*i+9]);
+	if(i==15){
+	cout<<"my a:"<<a<<endl;
+	cout<<"my b:"<<b<<endl;
+	cout<<"r3:"<<r3<<endl;
+	cout<<"r2:"<<r2<<endl;
+	cout<<"r1"<<r11<<endl;
+}
+
 	r3 = b^r3;
-	
-	a = ROL1(a);
+	r2 = a^r2;
+	if(i==15){
+		cout<<"blah"<<a<<" "<<r2<<endl;
+	}
+	//a = ROL1(a);
+	//cout<<r2<<endl;
+	r2 = ROR1(r2);//good
+
 	//now we swap for the next round
+if(i ==15){
+	cout<<r0<<" "<<r1<<" enc pre swap "<<r2<<" "<<r3<<endl;
+}
 	int copyr0 = r0;
 	r0 = r2;
 	r2 = copyr0;
@@ -590,17 +616,23 @@ for(int i =0; i<16; i++){
 	r1 = r3;
 	r3 = copyr1;
 
+if(i ==15){
+	cout<<r0<<" "<<r1<<" enc after swap "<<r2<<" "<<r3<<endl;
 }
+
+}
+	//cout<<r0<<" u"<<r1<<" "<<r2<<" "<<r3<<endl;
 
 //cout<<r0<<endl;
 unsigned int cipher[4];
+
 //Output Whitening
 cipher[0] = r0^subkeys[4];
 cipher[1] = r1^subkeys[5];
 cipher[2] = r2^subkeys[6];
 cipher[3] = r3^subkeys[7];
 for(int i =0; i<4; i++){
-	cout<<cipher[i]<<endl;
+	//cout<<cipher[i]<<endl;//the cipher text uncombinede
 }
 
 unsigned int ciphertext1[128];
@@ -622,12 +654,12 @@ num = 0;
 		}
 		
 		}
-//for(int i = 0; i<4; i++){
+
 	for (int j = 0; j<128; j++){
 		outfile<<ciphertext1[j];
 	}
 	outfile<<" "<<endl;
-//}
+
 //Decryption Portion:
 //Divide ciphertext into 4 32 bit chunks
 unsigned int c0[32];
@@ -647,7 +679,7 @@ for(int i=63; i>31; i--){
 	}
 	cout<<"\n";
 	place = 0;
-	for(int i = 95; i>64; i--){
+	for(int i = 95; i>63; i--){
 		c2[place] = ciphertext1[i];
 		place++;
 
@@ -663,9 +695,65 @@ unsigned int a =largeDecimal(c0)^subkeys[4];
 unsigned int b = largeDecimal(c1)^subkeys[5];
 unsigned int c = largeDecimal(c2)^subkeys[6];
 unsigned int d = largeDecimal(c3)^subkeys[7];
-cout<<d<<endl;
-cout<<r3<<endl;
+cout<<a<<" "<<b<<" pre dec swap "<<c<<" "<<" "<<d<<endl;
 //Now lets reverse the rounds
+for(int i = 15; i > -1; i--){
+	unsigned int copya = a;
+	unsigned int copyb = b;
+	a = c;
+	c = copya;
+	b = d;
+	d = copyb;
+	unsigned int reala = a;
+	unsigned int realb = b;
+
+//cout<<a<<" "<<b<<" post dec swap "<<c<<" "<<" "<<d<<endl;
+
+	c= ROL1(c);//this is good
+	//cout<<" rol1c"<<c<<endl;
+	//d = ROR1(d);
+ 	//we need to reverse a and b through the core of it all
+	unsigned int bb = ROL8(b);
+
+	unsigned int a0 = (a>>24) & 0xff;			 
+	unsigned int a1 = (a>>16)& 0xff;
+	unsigned int a2 = (a>>8) & 0xff;
+	unsigned int a3 = a & 0xff;
+	a0 = sboxes[0][a0];
+	a1 = sboxes[0][a1];
+	a2 = sboxes[0][a2];
+	a3 = sboxes[0][a3];
+	a = gFunction(a0,a1,a2,a3); //from r0
+
+
+	unsigned int b0 = (bb>>24) & 0xff;			 
+	unsigned int b1 = (bb>>16)& 0xff;
+	unsigned int b2 = (bb>>8) & 0xff;
+	unsigned int b3 = bb & 0xff;
+	b0 = sboxes[0][b0];
+	b1 = sboxes[0][b1];
+	b2 = sboxes[0][b2];
+	b3 = sboxes[0][b3];
+
+	bb = gFunction(b0,b1,b2,b3); 
+	copya = a;
+	a = pht(0,a,bb,subkeys[2*i+8]);
+	bb = pht(1,copya,bb,subkeys[2*i+9]);
+	c = c^a;
+	d = d^bb;
+	d = ROR1(d);
+	a = reala;
+	b = realb;
+	if(i==0){
+		cout<<a<<" "<<b<<" "<<c<<" "<<d<<endl;
+	}
+
+}
+unsigned int dec0 = a^subkeys[0];
+unsigned int dec1 = b^subkeys[1];
+unsigned int dec2 = c^subkeys[2];
+unsigned int dec3 = d^subkeys[3];
+cout<<dec0<<" "<<dec1<<" "<<dec2<<" "<<dec3<<endl;
 
 
 }
