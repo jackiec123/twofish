@@ -798,35 +798,72 @@ unsigned int dec;
 			dec = dec3;
 		}
 		j =0;
-		num = 31;
+		num = 0;
 		int counter = 7;
 		quotient = 0;
 		rem = 0;
-		while(num != -1){
+		while(num != 32){
 			quotient = dec/2;
 			rem = dec - quotient *2;
 			convert[k][num] = rem;
-			cout<<rem;
+			//cout<<rem;
 			dec = quotient;
-			num = num -1;
+			num = num +1;
 			j++;
 	
 	}
 }
+for(int i =0; i<4; i++){
+	for(int j = 0; j<32; j++){
+		cout<<convert[i][j];
+	}
+}
+cout<<"new"<<endl;
 	int final[16][8];
 	int loop = 0;
+	int lo;
+	int ii;
+	for(int k = 0; k<4; k++){
 	for(int j = 0; j<4; j++){
-		for(int i =0; i<32; i++){
-			if(i ==8){
-				loop = 
+		//ii = 7;
+		for(int i =0; i<8; i++){
+
+			if(j==0){
+				lo = i;
 			}
-			final[j][i] = convert[j][i];
-		}
-	}
+			if(j==1||j==2||j==3){
+				lo = j*8+i;
+			}
+			final[loop][i] = convert[k][lo];
 	
 
-	//need to divide into bytes and then convert to char --don't forgetthat byte is backwards need to flp
+			}
+			loop++;
+		}
+	}
+	cout<<"ji"<<endl;
+	for(int j = 0; j<16; j++){
+		for(int i =0; i<8; i++){
+						cout<<final[j][i];
+		}}
+	char decrytedMessage[16];
+	 int decryptedDec[16];
+	 int single[8];
+		for(int j = 0; j<16; j++){
+		
+		for(int i =0; i<8; i++){
+				
+				single[i] = final[j][i];
+				decryptedDec[j] = decimal(single);
+				
 
+		}}
+for(int i = 0; i<16; i++){
+	cout<<decryptedDec[i]<<endl;
+	outfile<<(char)decryptedDec[i];
+}
+
+//check decimals to see if correct
 
 
 }
