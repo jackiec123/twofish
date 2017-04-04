@@ -285,10 +285,35 @@ int main(){
 
 	//Message "encrypt twofish!" in binary
 	//Message is 128 bits for now, but can be any with padding
-	unsigned int message[128]={0,1,1,0,0,1,0,1,0,1,1,0,1,1,1,0,0,1,1,0,0,0,1,1, 
+/*	unsigned int message[128]={0,1,1,0,0,1,0,1,0,1,1,0,1,1,1,0,0,1,1,0,0,0,1,1, 
 		0,1,1,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,1,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,0,0,
 		0,0,0,0,1,1,1,0,1,0,0,0,1,1,1,0,1,1,1,0,1,1,0,1,1,1,1,0,1,1,0,0,1,1,0,0,1,1,
-		0,1,0,0,1,0,1,1,1,0,0,1,1,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1};
+		0,1,0,0,1,0,1,1,1,0,0,1,1,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,1};*/
+		cout<<"Enter 16 character message:"<<endl;
+	char plaintext[16];
+	//cin>>message;
+	cin.getline(plaintext, 17);
+	//int lenth = message.size();
+	cout<<plaintext<<endl;
+	unsigned int message[128];
+	int num2, quotient2, rem2;
+	int jj =0;
+	for(int i =0; i<16; i++){
+		int dec = (int)plaintext[i];
+		num2 = 7;
+		int counter = 7;
+		quotient2 = 0;
+		rem2 = 0;
+		while(num2 != -1){
+			quotient2 = dec/2;
+			rem2 = dec - quotient2 *2;
+			message[jj] = rem2;
+			dec = quotient2;
+			num2 = num2 -1;
+			jj++;
+			counter = counter -1;
+		}
+	}
 		outfile<<"M:"<<endl;
 	for (int i = 0; i<128; i++){
 		outfile<<message[i]; //prints message
@@ -318,7 +343,7 @@ int main(){
 		p3[place] = message[i];
 		place++;
 	}
-	outfile<<largeDecimal(p0)<<" "<<largeDecimal(p1)<<" "<<largeDecimal(p2)<<" "<<largeDecimal(p3)<<endl;
+	//outfile<<largeDecimal(p0)<<" "<<largeDecimal(p1)<<" "<<largeDecimal(p2)<<" "<<largeDecimal(p3)<<endl;
 
 	outfile<<"THE KEY"<<endl;
 
@@ -328,14 +353,14 @@ int main(){
 	unsigned int key[128];
 
 	for(int i = 0; i<128; i++){///128 zero's as the key
-	key[i] = 0;
-outfile<<key[i];
+	//key[i] = 0;
+//outfile<<key[i];
 }
 	for (int n = 0; n<128; n++){
 	  int i  = rand()%2;
-	  //key[n] = i;
+	  key[n] = i;
 	  //cout << key[n];
-	  //outfile<<key[n];
+	  outfile<<key[n];
 	}
 outfile<<"\n";
 
@@ -512,7 +537,7 @@ for(int i = 0; i<40; i++){
 		subkey = ROL8(hFunction(hWords[i],Modd));
 	}
 	subkeys[i] = subkey;
-	outfile<<i<<" "<<subkeys[i]<<endl;
+	//outfile<<i<<" "<<subkeys[i]<<endl;
 	//cout<<i<<" "<< subkeys[i]<<" end "<<endl;
 }
 
@@ -745,7 +770,7 @@ for(int i = 15; i > -1; i--){
 	a = reala;
 	b = realb;
 	if(i==0){
-		cout<<a<<" "<<b<<" "<<c<<" "<<d<<endl;
+		//cout<<a<<" "<<b<<" "<<c<<" "<<d<<endl;
 	}
 
 }
@@ -754,6 +779,54 @@ unsigned int dec1 = b^subkeys[1];
 unsigned int dec2 = c^subkeys[2];
 unsigned int dec3 = d^subkeys[3];
 cout<<dec0<<" "<<dec1<<" "<<dec2<<" "<<dec3<<endl;
+
+//convert dec to 4 bytes
+unsigned int convert[4][32];
+unsigned int dec;
+
+	for(int k = 0; k<4; k++){
+		if(k ==0){
+			dec = dec0;
+		}
+		if(k==1){
+			dec = dec1;
+		}
+		if(k==2){
+			dec = dec2;
+		}
+		if(k==3){
+			dec = dec3;
+		}
+		j =0;
+		num = 31;
+		int counter = 7;
+		quotient = 0;
+		rem = 0;
+		while(num != -1){
+			quotient = dec/2;
+			rem = dec - quotient *2;
+			convert[k][num] = rem;
+			cout<<rem;
+			dec = quotient;
+			num = num -1;
+			j++;
+	
+	}
+}
+	int final[16][8];
+	int loop = 0;
+	for(int j = 0; j<4; j++){
+		for(int i =0; i<32; i++){
+			if(i ==8){
+				loop = 
+			}
+			final[j][i] = convert[j][i];
+		}
+	}
+	
+
+	//need to divide into bytes and then convert to char --don't forgetthat byte is backwards need to flp
+
 
 
 }
